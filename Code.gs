@@ -13,7 +13,7 @@
 
 /* ▼▼▼ 여기 두 줄만 고치면 됩니다 ▼▼▼ */
 var CLIENT_ID = '205893269353-a88gdh9ijp27v5c7ca0o5ig3absiv89s.apps.googleusercontent.com';
-var TEACHERS  = ['onixzone@ai.jne.kr','edunity21@gmail.com'];   // 교사 계정. 쉼표로 여러 명 가능
+var TEACHERS  = ['edunity21@gmail.com', 'onixzone@ai.jne.kr'];   // 교사 계정. 쉼표로 여러 명 가능
 /* ▲▲▲ ------------------------------ ▲▲▲ */
 
 var DOMAIN = 'ai.jne.kr';     // 학생 계정 도메인
