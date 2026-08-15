@@ -12,8 +12,8 @@
    ============================================================ */
 
 /* ▼▼▼ 여기 두 줄만 고치면 됩니다 ▼▼▼ */
-var CLIENT_ID = '여기에-구글-클라이언트-ID-붙여넣기.apps.googleusercontent.com';
-var TEACHERS  = ['선생님계정@jne.go.kr'];   // 교사 계정. 쉼표로 여러 명 가능
+var CLIENT_ID = '205893269353-a88gdh9ijp27v5c7ca0o5ig3absiv89s.apps.googleusercontent.com';
+var TEACHERS  = ['onixzone@ai.jne.kr','edunity21@gmail.com'];   // 교사 계정. 쉼표로 여러 명 가능
 /* ▲▲▲ ------------------------------ ▲▲▲ */
 
 var DOMAIN = 'ai.jne.kr';     // 학생 계정 도메인
@@ -58,12 +58,13 @@ function route_(req) {
   var me = verify_(req.idToken);
   if (!me.ok) return me;
 
+  if (act === 'gate')            return gate_(me, req);
   if (act === 'status')          return status_(me);
   if (act === 'check')           return check_(me);
   if (act === 'submit')          return submit_(me, req);
-  if (act === 'teacher_status')  return teacherStatus_(me);
+  if (act === 'teacher_status')  return teacherStatus_(me, req);
   if (act === 'teacher_window')  return teacherWindow_(me, req);
-  if (act === 'teacher_export')  return teacherExport_(me);
+  if (act === 'teacher_export')  return teacherExport_(me, req);
   if (act === 'teacher_unbind')  return teacherUnbind_(me, req);
   if (act === 'teacher_delete')  return teacherDelete_(me, req);
 
@@ -142,7 +143,9 @@ function sheet_(name, header) {
 function setup() {                       // ← 최초 1회 직접 실행
   var s = sheet_(SH_SET, ['항목', '값', '설명']);
   if (s.getLastRow() < 2) {
-    s.getRange(2, 1, 6, 3).setValues([
+    s.getRange(2, 1, 8, 3).setValues([
+      ['학습자비밀번호', 'sp2026', '학생이 구글 로그인 뒤에 한 번 더 입력합니다. 여기서 바꾸면 즉시 반영됩니다.'],
+      ['수업자비밀번호', 'po8286', '선생님이 구글 로그인 뒤에 한 번 더 입력합니다.'],
       ['제출허용',  'FALSE', 'TRUE 로 바꾸면 학생이 제출할 수 있습니다. 교사 화면의 스위치와 연결됩니다.'],
       ['시작시각',  '',      '비워 두면 제한 없음. 예) 2026-08-20 09:00'],
       ['종료시각',  '',      '비워 두면 제한 없음. 예) 2026-08-20 09:45'],
@@ -207,6 +210,88 @@ function parseTime_(v) {
 
 function fmt_(d) { return Utilities.formatDate(d, TZ, 'M월 d일 HH:mm'); }
 function nowStr_() { return Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd HH:mm:ss'); }
+
+
+/* ===================== 수업 비밀번호 =====================
+   구글 로그인만으로는 공용 컴퓨터에서 앞 학생 계정이 그대로
+   남아 있을 수 있다. 그래서 한 겹을 더 둔다.
+
+   비밀번호는 [설정] 시트에만 있고 페이지 소스에는 없다.
+   확인도 서버에서 하므로 화면을 뜯어고쳐도 지나갈 수 없다.   */
+
+function pw_(role) {
+  var key = (role === 'teacher') ? '수업자비밀번호' : '학습자비밀번호';
+  var c = cfg_();
+  var v = c[key];
+  if (v === undefined || String(v).trim() === '') {
+    v = (role === 'teacher') ? 'po8286' : 'sp2026';       // 시트에 없으면 만들어 둔다
+    cfgSet_(key, v);
+  }
+  return String(v).trim();
+}
+
+/* 통행증 — 비밀번호를 통과한 사람에게만 준다.
+   서명이 들어 있어 위조할 수 없고, 8시간 뒤 저절로 만료된다. */
+
+function secret_() {
+  var p = PropertiesService.getScriptProperties();
+  var s = p.getProperty('PASS_SECRET');
+  if (!s) { s = Utilities.getUuid() + Utilities.getUuid(); p.setProperty('PASS_SECRET', s); }
+  return s;
+}
+
+function sign_(body) {
+  return Utilities.base64EncodeWebSafe(
+    Utilities.computeHmacSha256Signature(body, secret_()));
+}
+
+function issuePass_(email, role) {
+  var body = email + '|' + role + '|' + (Date.now() + 8 * 3600 * 1000);
+  return Utilities.base64EncodeWebSafe(body) + '.' + sign_(body);
+}
+
+function checkPass_(pass, email, role) {
+  try {
+    var part = String(pass || '').split('.');
+    if (part.length !== 2) return false;
+    var body = Utilities.newBlob(Utilities.base64DecodeWebSafe(part[0])).getDataAsString();
+    if (sign_(body) !== part[1]) return false;
+    var f = body.split('|');
+    if (f[0] !== email) return false;
+    if (role && f[1] !== role) return false;
+    if (Number(f[2]) < Date.now()) return false;
+    return true;
+  } catch (e) { return false; }
+}
+
+/* 비밀번호를 받아 통행증을 내준다 */
+function gate_(me, req) {
+  var role = (req.role === 'teacher') ? 'teacher' : 'student';
+
+  if (role === 'teacher' && !me.teacher) {
+    log_(me.email, '입장', '거부', '수업자 명단에 없음');
+    return { ok: false, error: '이 계정은 수업자로 등록되어 있지 않습니다.\n선생님 계정으로 다시 로그인해 주세요.' };
+  }
+
+  // 같은 계정으로 10분에 10번까지만 시도할 수 있다
+  var ck = CacheService.getScriptCache();
+  var kk = 'try_' + Utilities.base64EncodeWebSafe(me.email);
+  var n = Number(ck.get(kk) || 0);
+  if (n >= 10) {
+    log_(me.email, '입장', '거부', '시도 횟수 초과');
+    return { ok: false, error: '비밀번호를 너무 여러 번 틀렸습니다.\n10분 뒤에 다시 해 주세요.', need: 'pw' };
+  }
+
+  if (String(req.pw || '').trim() !== pw_(role)) {
+    ck.put(kk, String(n + 1), 600);
+    log_(me.email, '입장', '거부', '비밀번호 불일치 (' + (n + 1) + '회)');
+    return { ok: false, error: '비밀번호가 다릅니다.', need: 'pw' };
+  }
+
+  ck.remove(kk);
+  log_(me.email, '입장', '성공', role === 'teacher' ? '수업자' : '학습자');
+  return { ok: true, pass: issuePass_(me.email, role), role: role };
+}
 
 
 /* ===================== 학생 : 상태 ===================== */
@@ -289,6 +374,10 @@ function findSubmissions_(email) {
 /* ===================== 학생 : 제출 ===================== */
 
 function submit_(me, req) {
+  if (!checkPass_(req.pass, me.email, 'student')) {
+    return { ok: false, error: '수업 비밀번호를 다시 입력해 주세요.', need: 'pw' };
+  }
+
   var lock = LockService.getScriptLock();
   try { lock.waitLock(20000); } catch (e) { return { ok: false, error: '잠시 뒤 다시 눌러 주세요.' }; }
 
@@ -355,12 +444,16 @@ function log_(email, act, result, memo) {
 
 /* ===================== 교사 ===================== */
 
-function needTeacher_(me) {
-  return me.teacher ? null : { ok: false, error: '수업자 권한이 없는 계정입니다.' };
+function needTeacher_(me, req) {
+  if (!me.teacher) return { ok: false, error: '수업자 권한이 없는 계정입니다.' };
+  if (!checkPass_(req && req.pass, me.email, 'teacher')) {
+    return { ok: false, error: '수업자 비밀번호를 다시 입력해 주세요.', need: 'pw' };
+  }
+  return null;
 }
 
-function teacherStatus_(me) {
-  var no = needTeacher_(me); if (no) return no;
+function teacherStatus_(me, req) {
+  var no = needTeacher_(me, req); if (no) return no;
 
   var c = cfg_(), w = windowState_();
   var s = sheet_(SH_SUB);
@@ -396,7 +489,7 @@ function teacherStatus_(me) {
 }
 
 function teacherWindow_(me, req) {
-  var no = needTeacher_(me); if (no) return no;
+  var no = needTeacher_(me, req); if (no) return no;
   if (typeof req.on      !== 'undefined') cfgSet_('제출허용',  req.on ? 'TRUE' : 'FALSE');
   if (typeof req.from    !== 'undefined') cfgSet_('시작시각',  String(req.from || ''));
   if (typeof req.to      !== 'undefined') cfgSet_('종료시각',  String(req.to || ''));
@@ -404,14 +497,14 @@ function teacherWindow_(me, req) {
   if (typeof req.again   !== 'undefined') cfgSet_('재제출허용', req.again ? 'TRUE' : 'FALSE');
   if (typeof req.rollOnly!== 'undefined') cfgSet_('명렬표검사', req.rollOnly ? 'TRUE' : 'FALSE');
   log_(me.email, '제출창', '변경', JSON.stringify(req).slice(0, 200));
-  return teacherStatus_(me);
+  return teacherStatus_(me, req);
 }
 
 /* 모든 제출을 하나로 합쳐 돌려준다.
    → 교사가 내려받아 기존 [제출 파일 불러오기] 에 그대로 넣으면
      지금 쓰던 엑셀 기능이 전부 그대로 돌아간다.             */
-function teacherExport_(me) {
-  var no = needTeacher_(me); if (no) return no;
+function teacherExport_(me, req) {
+  var no = needTeacher_(me, req); if (no) return no;
 
   var s = sheet_(SH_SUB);
   if (s.getLastRow() < 2) return { ok: true, files: [] };
@@ -430,7 +523,7 @@ function teacherExport_(me) {
 }
 
 function teacherUnbind_(me, req) {
-  var no = needTeacher_(me); if (no) return no;
+  var no = needTeacher_(me, req); if (no) return no;
   var sid = String(req.sid || '').trim();
   var s = sheet_(SH_SUB);
   if (s.getLastRow() < 2) return { ok: true, removed: 0 };
@@ -443,7 +536,7 @@ function teacherUnbind_(me, req) {
 }
 
 function teacherDelete_(me, req) {
-  var no = needTeacher_(me); if (no) return no;
+  var no = needTeacher_(me, req); if (no) return no;
   var row = Number(req.row || 0);
   if (row < 2) return { ok: false, error: '지울 수 없는 줄입니다.' };
   sheet_(SH_SUB).deleteRow(row);

@@ -1,0 +1,123 @@
+/* cloud.css — 온라인 제출 화면에만 쓰는 스타일.
+   기존 style.css 를 건드리지 않고 뒤에 얹습니다. */
+
+:root{
+  --cl-ink:#241F1B;
+  --cl-dim:#7A6F63;
+  --cl-line:#D8CEBE;
+  --cl-paper:#F6F1E6;
+  --cl-red:#C4462F;      /* 진달래 */
+  --cl-green:#3E7A52;
+}
+
+/* ---------- 로그인 ---------- */
+.cloud-gate{ text-align:center; }
+.cloud-gate h2{ font-family:"Nanum Myeongjo",serif; font-size:1.25rem; margin:0 0 10px; }
+.cg-lead{ color:var(--cl-dim); font-size:.86rem; line-height:1.7; margin:0 0 18px; }
+.cg-gbtn{ display:flex; justify-content:center; min-height:44px; margin-bottom:8px; }
+
+.cg-me{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:"JetBrains Mono",monospace; font-size:.78rem;
+  background:var(--cl-paper); border:1px solid var(--cl-line);
+  border-radius:999px; padding:7px 14px; margin-bottom:16px; color:var(--cl-ink);
+}
+.cg-dot{ width:7px; height:7px; border-radius:50%; background:var(--cl-green); flex:none; }
+
+.cg-fields{ text-align:left; }
+.cg-fields input.locked{ background:var(--cl-paper); color:var(--cl-dim); cursor:not-allowed; }
+.cg-msg{
+  color:var(--cl-red); font-size:.8rem; line-height:1.6;
+  white-space:pre-line; margin:10px 0 14px; min-height:1.2em;
+}
+
+/* ---------- 학생 제출 칸 ---------- */
+.cl-act{ border-left:3px solid var(--cl-red); padding-left:16px; }
+.cl-state{ display:flex; align-items:center; gap:9px; margin:6px 0 14px; font-size:.9rem; }
+.cl-lamp{
+  width:9px; height:9px; border-radius:50%; flex:none;
+  background:var(--cl-line); box-shadow:0 0 0 0 rgba(196,70,47,0);
+  transition:background .3s, box-shadow .3s;
+}
+.cl-state.on .cl-lamp{ background:var(--cl-red); box-shadow:0 0 0 5px rgba(196,70,47,.14); }
+.cl-state.on b{ color:var(--cl-red); }
+.cl-state b{ font-weight:600; color:var(--cl-dim); }
+
+/* ---------- 교사 통제 ---------- */
+.cl-admin .cl-switch{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin:16px 0 20px; }
+
+.cl-toggle{
+  display:inline-flex; align-items:center; gap:11px;
+  background:var(--cl-paper); border:1px solid var(--cl-line);
+  border-radius:999px; padding:8px 18px 8px 9px; cursor:pointer;
+  font:inherit; font-size:.9rem; color:var(--cl-dim);
+  transition:background .2s, border-color .2s, color .2s;
+}
+.cl-toggle .cl-knob{
+  width:34px; height:19px; border-radius:999px; background:#CFC5B5;
+  position:relative; flex:none; transition:background .2s;
+}
+.cl-toggle .cl-knob::after{
+  content:""; position:absolute; top:2px; left:2px;
+  width:15px; height:15px; border-radius:50%; background:#fff;
+  transition:transform .2s;
+}
+.cl-toggle.on{ background:rgba(196,70,47,.07); border-color:var(--cl-red); color:var(--cl-red); font-weight:600; }
+.cl-toggle.on .cl-knob{ background:var(--cl-red); }
+.cl-toggle.on .cl-knob::after{ transform:translateX(15px); }
+.cl-now{ font-size:.8rem; color:var(--cl-dim); }
+
+.cl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin-bottom:14px; }
+.cl-grid label{ display:flex; flex-direction:column; gap:6px; font-size:.78rem; color:var(--cl-dim); }
+.cl-grid input{
+  font:inherit; font-size:.9rem; padding:9px 11px;
+  border:1px solid var(--cl-line); border-radius:7px; background:#fff; color:var(--cl-ink);
+}
+.cl-grid input:focus-visible, .cl-toggle:focus-visible{ outline:2px solid var(--cl-red); outline-offset:2px; }
+
+.cl-checks{ display:flex; gap:22px; flex-wrap:wrap; margin-bottom:18px; font-size:.83rem; color:var(--cl-dim); }
+.cl-checks label{ display:flex; align-items:center; gap:7px; cursor:pointer; }
+
+.cl-sum{ display:flex; gap:34px; flex-wrap:wrap; margin:22px 0 18px; padding-top:18px; border-top:1px solid var(--cl-line); }
+.cl-sum div{ display:flex; flex-direction:column; }
+.cl-sum b{ font-family:"Nanum Myeongjo",serif; font-size:1.7rem; line-height:1.1; color:var(--cl-ink); }
+.cl-sum span{ font-size:.74rem; color:var(--cl-dim); margin-top:3px; }
+
+/* ---------- 명단 ---------- */
+.cl-list{ margin-top:18px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.cl-table{ width:100%; border-collapse:collapse; font-size:.83rem; min-width:560px; }
+.cl-table th{
+  text-align:left; font-weight:600; font-size:.72rem; letter-spacing:.04em;
+  color:var(--cl-dim); padding:0 10px 9px; border-bottom:1px solid var(--cl-line); white-space:nowrap;
+}
+.cl-table td{ padding:10px; border-bottom:1px solid rgba(216,206,190,.5); vertical-align:middle; }
+.cl-table tr:hover td{ background:var(--cl-paper); }
+.cl-table .mono{ font-family:"JetBrains Mono",monospace; font-size:.79rem; }
+.cl-mail{ color:var(--cl-dim); font-size:.76rem; max-width:210px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cl-x{
+  border:0; background:none; color:var(--cl-line); font-size:1.1rem; line-height:1;
+  cursor:pointer; padding:3px 7px; border-radius:5px;
+}
+.cl-x:hover{ color:var(--cl-red); background:rgba(196,70,47,.08); }
+
+/* ---------- 전체화면 단추 ---------- */
+.fsbtn.on{ border-color:var(--cl-red); color:var(--cl-red); }
+:fullscreen .masthead{ padding-top:18px; }
+
+@media (max-width:640px){
+  .cl-sum{ gap:22px; }
+  .cl-admin .cl-switch{ gap:10px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .cl-lamp, .cl-toggle, .cl-toggle .cl-knob, .cl-toggle .cl-knob::after{ transition:none; }
+}
+
+/* ---------- 계정 갈아타기 ---------- */
+.cg-swap{ margin:-8px 0 16px; }
+.cg-swap button{
+  border:0; background:none; cursor:pointer; font:inherit;
+  font-size:.76rem; color:var(--cl-dim); text-decoration:underline;
+  text-underline-offset:3px; padding:4px 6px; border-radius:5px;
+}
+.cg-swap button:hover{ color:var(--cl-red); }
+.cg-swap button:focus-visible{ outline:2px solid var(--cl-red); outline-offset:2px; }
