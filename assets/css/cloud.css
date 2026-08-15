@@ -111,3 +111,13 @@
 @media (prefers-reduced-motion:reduce){
   .cl-lamp, .cl-toggle, .cl-toggle .cl-knob, .cl-toggle .cl-knob::after{ transition:none; }
 }
+
+/* ---------- 계정 갈아타기 ---------- */
+.cg-swap{ margin:-8px 0 16px; }
+.cg-swap button{
+  border:0; background:none; cursor:pointer; font:inherit;
+  font-size:.76rem; color:var(--cl-dim); text-decoration:underline;
+  text-underline-offset:3px; padding:4px 6px; border-radius:5px;
+}
+.cg-swap button:hover{ color:var(--cl-red); }
+.cg-swap button:focus-visible{ outline:2px solid var(--cl-red); outline-offset:2px; }
