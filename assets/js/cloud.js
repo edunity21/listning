@@ -15,8 +15,8 @@
 'use strict';
 
 /* ▼▼▼ 설치할 때 이 세 줄만 고칩니다 ▼▼▼ */
-var API       = '여기에-Apps-Script-웹앱-URL-붙여넣기';
-var CLIENT_ID = '여기에-구글-클라이언트-ID-붙여넣기.apps.googleusercontent.com';
+var API       = 'https://script.google.com/macros/s/AKfycbwIw4AUL_A-RzySams0YYud-zOei9UxQmrC4-GumwvrHNbHHLjR1Nx1C9Lk2GD2fUhAew/exec';
+var CLIENT_ID = '205893269353-a88gdh9ijp27v5c7ca0o5ig3absiv89s.apps.googleusercontent.com';
 var DOMAIN    = 'ai.jne.kr';
 /* ▲▲▲ ------------------------------- ▲▲▲ */
 
