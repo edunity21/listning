@@ -15,13 +15,13 @@
 'use strict';
 
 /* ▼▼▼ 설치할 때 이 세 줄만 고칩니다 ▼▼▼ */
-var API       = 'https://script.google.com/macros/s/AKfycbwIw4AUL_A-RzySams0YYud-zOei9UxQmrC4-GumwvrHNbHHLjR1Nx1C9Lk2GD2fUhAew/exec';
-var CLIENT_ID = '205893269353-a88gdh9ijp27v5c7ca0o5ig3absiv89s.apps.googleusercontent.com';
+var API       = '여기에-Apps-Script-웹앱-URL-붙여넣기';
+var CLIENT_ID = '여기에-구글-클라이언트-ID-붙여넣기.apps.googleusercontent.com';
 var DOMAIN    = 'ai.jne.kr';
 /* ▲▲▲ ------------------------------- ▲▲▲ */
 
 var S = {                     // 지금 상태
-  token: null, email: '', teacher: false,
+  token: null, pass: null, email: '', teacher: false,
   sid: '', name: '', fixed: false,
   open: false, why: '확인 중', round: '', count: 0,
   ready: false, passing: false
@@ -43,7 +43,7 @@ function say(msg) {                        // app.js 의 토스트를 빌려 쓴
    Apps Script 는 사전요청(OPTIONS)을 못 받기 때문입니다.      */
 
 function call(action, body) {
-  var payload = Object.assign({ action: action, idToken: S.token }, body || {});
+  var payload = Object.assign({ action: action, idToken: S.token, pass: S.pass }, body || {});
   return fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -52,7 +52,8 @@ function call(action, body) {
   })
   .then(function (r) { return r.json(); })
   .then(function (o) {
-    if (o && o.need === 'login') { S.token = null; promptLogin(); }
+    if (o && o.need === 'login') { S.token = null; S.pass = null; promptLogin(); }
+    if (o && o.need === 'pw')    { S.pass = null; }
     return o;
   })
   .catch(function () {
@@ -132,11 +133,15 @@ function buildGate() {
     '다른 계정은 들어올 수 없습니다.</p>' +
     '<div class="cg-gbtn" id="cgBtn"></div>' +
     '<div class="cg-me" id="cgMe" style="display:none"></div>' +
+    '<div class="cg-swap" id="cgSwap" style="display:none">' +
+      '<button type="button" id="cgOther">내 계정이 아닙니다 · 다른 계정으로</button></div>' +
     '<div class="cg-fields" id="cgFields" style="display:none">' +
-      '<div class="fld"><label for="cgSid">학번</label>' +
+      '<div class="fld" id="cgSidBox"><label for="cgSid">학번</label>' +
         '<input id="cgSid" type="text" inputmode="numeric" maxlength="5" placeholder="3105" autocomplete="off"></div>' +
-      '<div class="fld"><label for="cgName">이름</label>' +
+      '<div class="fld" id="cgNameBox"><label for="cgName">이름</label>' +
         '<input id="cgName" type="text" maxlength="10" placeholder="홍길동" autocomplete="off"></div>' +
+      '<div class="fld"><label for="cgPw">수업 비밀번호</label>' +
+        '<input id="cgPw" type="password" maxlength="20" placeholder="선생님이 알려 준 비밀번호" autocomplete="off"></div>' +
     '</div>' +
     '<p class="cg-msg" id="cgMsg"></p>' +
     '<div class="btn-row" style="justify-content:center">' +
@@ -154,8 +159,15 @@ function buildGate() {
   $('#cgGo').addEventListener('click', enter);
 
   // 학번을 다 치면 바로 들어갈 수 있게
-  ['cgSid', 'cgName'].forEach(function (id) {
+  ['cgSid', 'cgName', 'cgPw'].forEach(function (id) {
     $('#' + id).addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+  });
+
+  // 앞사람 계정이 남아 있을 때 갈아타기
+  $('#cgOther').addEventListener('click', function () {
+    try { google.accounts.id.disableAutoSelect(); } catch (e) {}
+    S.token = null; S.pass = null; S.ready = false;
+    location.reload();
   });
 }
 
@@ -182,22 +194,30 @@ function afterLogin(o) {
   var me = $('#cgMe');
   me.style.display = '';
   me.innerHTML = '<span class="cg-dot"></span>' + S.email + (S.teacher ? ' · 수업자' : '');
+  $('#cgSwap').style.display = '';          // 앞사람 계정일 수 있으니 항상 보여 준다
 
   if (wanted === 'teacher' && !S.teacher) {
     gateMsg('이 계정은 수업자로 등록되어 있지 않습니다.\n선생님 계정으로 다시 로그인해 주세요.');
+    $('#cgFields').style.display = 'none';
     $('#cgGo').style.display = 'none';
     return;
   }
 
+  $('#cgFields').style.display = '';
+  $('#cgGo').style.display = '';
+  $('#cgPw').value = '';
+
   if (wanted === 'teacher') {
-    gateMsg('');
-    $('#cgGo').style.display = '';
-    enter();
+    $('#cgSidBox').style.display = 'none';
+    $('#cgNameBox').style.display = 'none';
+    gateMsg('수업자 비밀번호를 입력해 주세요.');
+    setTimeout(function () { $('#cgPw').focus(); }, 60);
     return;
   }
 
   // 학생
-  $('#cgFields').style.display = '';
+  $('#cgSidBox').style.display = '';
+  $('#cgNameBox').style.display = '';
   $('#cgSid').value = S.sid;
   $('#cgName').value = S.name;
   if (S.fixed) {
@@ -207,22 +227,44 @@ function afterLogin(o) {
   } else if (S.sid) {
     gateMsg('전에 제출한 학번입니다. 바꾸려면 선생님께 말씀해 주세요.');
   } else {
-    gateMsg('학번과 이름을 적어 주세요. 한 번 제출하면 이 계정에 묶입니다.');
+    gateMsg('학번과 이름을 적고 비밀번호를 입력해 주세요.');
   }
-  $('#cgGo').style.display = '';
+  setTimeout(function () { $((S.fixed || S.sid) ? '#cgPw' : '#cgSid').focus(); }, 60);
 }
 
-/* app.js 의 원래 로그인 절차를 그대로 태운다 (비밀번호는 자동으로 채움) */
+/* 비밀번호를 서버에 확인받은 뒤에야 들어간다.
+   화면을 뜯어고쳐 이 단계를 건너뛰어도, 통행증이 없으면
+   제출도 교사 기능도 서버가 거절한다.                     */
 function enter() {
   var sid  = S.fixed ? S.sid  : ($('#cgSid')  ? $('#cgSid').value.trim()  : '');
   var name = S.fixed ? S.name : ($('#cgName') ? $('#cgName').value.trim() : '');
+  var pw   = $('#cgPw') ? $('#cgPw').value.trim() : '';
 
   if (wanted === 'student') {
     if (!/^\d{4,5}$/.test(sid)) { gateMsg('학번을 4~5자리 숫자로 적어 주세요.'); return; }
     if (name.length < 2)        { gateMsg('이름을 적어 주세요.'); return; }
-    S.sid = sid; S.name = name;
   }
+  if (!pw) { gateMsg('수업 비밀번호를 입력해 주세요.'); return; }
 
+  var btn = $('#cgGo');
+  btn.disabled = true; btn.textContent = '확인 중…';
+  gateMsg('');
+
+  call('gate', { role: wanted, pw: pw }).then(function (o) {
+    btn.disabled = false; btn.textContent = '들어가기';
+    if (!o.ok) {
+      gateMsg(o.error || '들어갈 수 없습니다.');
+      if ($('#cgPw')) { $('#cgPw').value = ''; $('#cgPw').focus(); }
+      return;
+    }
+    S.pass = o.pass;
+    if (wanted === 'student') { S.sid = sid; S.name = name; }
+    openApp(sid, name);
+  });
+}
+
+/* app.js 의 원래 로그인 절차를 그대로 태운다 */
+function openApp(sid, name) {
   var pw = (typeof CONFIG === 'object' && CONFIG)
     ? (wanted === 'teacher' ? CONFIG.adminPw : CONFIG.studentPw) : '';
 
@@ -350,7 +392,12 @@ function send() {
     return call('submit', { sid: S.sid, name: S.name, count: p.count, payload: p.raw });
   }).then(function (o) {
     btn.textContent = '지금 제출하기';
-    if (!o.ok) { say(o.error || '제출하지 못했습니다.'); if (o.closed) refresh(); btn.disabled = !S.open; return; }
+    if (!o.ok) {
+      say(o.error || '제출하지 못했습니다.');
+      if (o.need === 'pw') say('[나가기]를 누르고 다시 들어와 주세요.');
+      if (o.closed) refresh();
+      btn.disabled = !S.open; return;
+    }
     S.count = o.nth;
     say('제출했습니다 · ' + o.at);
     paintSubmit();
@@ -618,8 +665,22 @@ function toLocal(s) {                       // '2026-08-20 09:00' → input 값
 function fromLocal(v) { return v ? v.replace('T', ' ') : ''; }
 function isVisible(e) { return e && e.offsetParent !== null; }
 
+function mountLogout() {
+  var b = $('#logout');
+  if (!b || b._cl) return;
+  b._cl = 1;
+  b.addEventListener('click', function () {
+    S.pass = null; S.token = null; S.ready = false; S.teacher = false;
+    try { google.accounts.id.disableAutoSelect(); } catch (e) {}
+    // app.js 가 제 정리를 마친 뒤 페이지를 새로 연다.
+    // 메모리에 아무것도 남지 않으므로 다음 사람은 반드시 처음부터 거친다.
+    setTimeout(function () { location.reload(); }, 150);
+  }, true);
+}
+
 function mountAll() {
   mountFullscreen();
+  mountLogout();
   if (S.teacher) mountTeacher();
   else { mountSubmit(); paintSubmit(); refresh(); }
 }
@@ -638,6 +699,8 @@ document.addEventListener('DOMContentLoaded', function () {
   setInterval(function () { if (S.ready && !S.teacher && isVisible($('#sheet'))) refresh(); }, 20000);
 });
 
-window.CLOUD = { state: S, refresh: refresh, full: toggleFull };
+var VERSION = 'cloud.js v2 · 수업 비밀번호 서버 확인판';
+console.log('[' + VERSION + ']');
+window.CLOUD = { version: VERSION, state: S, refresh: refresh, full: toggleFull };
 
 })();
