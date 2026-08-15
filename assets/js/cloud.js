@@ -354,11 +354,91 @@ function mountSubmit() {
       '<button class="btn" type="button" id="clSend" disabled>지금 제출하기</button>' +
       '<button class="btn ghost small" type="button" id="clRefresh">상태 새로고침</button>' +
     '</div>' +
-    '<p class="cap" id="clMine"></p>';
+    '<p class="cap" id="clMine"></p>' +
+    '<p class="cap cl-auto" id="clAuto">[저장하기] 를 누르면 선생님 서버에도 자동으로 보관됩니다.</p>';
   host.insertBefore(box, firstAct || null);
 
   $('#clSend').addEventListener('click', send);
   $('#clRefresh').addEventListener('click', function () { refresh(true); });
+  hookAutosave();
+}
+
+
+/* ===================== 자동 저장 =====================
+   [저장하기] 를 누를 때마다 서버에도 조용히 올려 둔다.
+   학생이 제출을 잊어도, 브라우저 기록이 지워져도,
+   다른 컴퓨터로 옮겨 앉아도 선생님이 꺼낼 수 있다.
+
+   app.js 를 고치지 않는다. 단추에 귀만 하나 더 붙인다.   */
+
+var autoTimer = null, autoLast = '', autoBusy = false;
+
+function hookAutosave() {
+  var b = $('#sheetSave');
+  if (!b || b.dataset.clAuto) return;
+  b.dataset.clAuto = '1';
+
+  // app.js 가 먼저 localStorage 에 쓴 뒤 우리가 읽어야 하므로
+  // 기본 단계(버블)에서 듣고, 약간 늦춰 모아 보낸다.
+  b.addEventListener('click', function () { queueAutosave(1200); });
+
+  // 탭을 덮거나 닫을 때 마지막으로 한 번 더
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') queueAutosave(0);
+  });
+}
+
+function queueAutosave(wait) {
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(pushAutosave, wait);
+}
+
+/* app.js 의 저장소를 그대로 읽는다.
+   [제출 파일 만들기] 를 누르는 방식이 아니라서 토스트가 뜨지 않는다. */
+function readLocal() {
+  try {
+    var box = JSON.parse(localStorage.getItem('jindalrae.v3') || '{}');
+    var stu = (box.roster || {})[S.sid];
+    if (!stu || !stu.tracks) return null;
+    var n = Object.keys(stu.tracks).length;
+    if (!n) return null;
+    return {
+      n: n,
+      raw: JSON.stringify({
+        app: 'jindalrae', ver: 3, exported: stu.updated || '',
+        sid: stu.sid, name: stu.name, tracks: stu.tracks
+      }, null, 1)
+    };
+  } catch (e) { return null; }
+}
+
+function autoMsg(t) { var e = $('#clAuto'); if (e) e.textContent = t; }
+
+function pushAutosave() {
+  if (autoBusy || !S.token || !S.pass || !S.sid) return;
+
+  var p = readLocal();
+  if (!p) return;
+  if (p.raw === autoLast) return;              // 바뀐 게 없으면 보내지 않는다
+
+  autoBusy = true;
+  autoMsg('보관 중…');
+
+  call('autosave', { sid: S.sid, name: S.name, count: p.n, payload: p.raw })
+    .then(function (o) {
+      autoBusy = false;
+      if (o && o.ok) {
+        autoLast = p.raw;
+        autoMsg('선생님 서버에 보관됨 · ' + String(o.at).slice(11) + ' · ' + p.n + '곡');
+        return;
+      }
+      if (o && o.retry) { queueAutosave(4000); return; }   // 잠깐 밀렸을 뿐
+      autoMsg('보관하지 못했습니다. 다음 저장 때 다시 시도합니다.');
+    })
+    .catch(function () {
+      autoBusy = false;
+      autoMsg('인터넷이 끊겨 보관하지 못했습니다. 다음 저장 때 다시 시도합니다.');
+    });
 }
 
 function paintSubmit() {
@@ -699,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
   setInterval(function () { if (S.ready && !S.teacher && isVisible($('#sheet'))) refresh(); }, 20000);
 });
 
-var VERSION = 'cloud.js v2 · 수업 비밀번호 서버 확인판';
+var VERSION = 'cloud.js v4 · 자동 저장판';
 console.log('[' + VERSION + ']');
 window.CLOUD = { version: VERSION, state: S, refresh: refresh, full: toggleFull };
 
