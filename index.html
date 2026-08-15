@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>진달래꽃 × 서양음악사 — 한 편의 시, 스무 개의 시대</title>
+<meta name="description" content="김소월의 「진달래꽃」을 서양음악사 스무 개 시대·장르로 바꿔 듣고 비교하는 음악 감상 학습 페이지.">
+<meta name="theme-color" content="#EDE7DB">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/cloud.css">
+</head>
+<body class="locked">
+
+<!-- ================= 로그인 ================= -->
+<div class="gate on" id="gate">
+  <div class="gate-card">
+    <p class="eyebrow" id="gateSchool">승평중학교 음악</p>
+    <h1>진달래<span class="pt">꽃</span></h1>
+    <p class="gate-sub">한 편의 시, 스무 개의 시대 — 서양음악사 감상</p>
+
+    <div id="gatePick" class="gate-pick">
+      <button class="pickcard" type="button" id="pickStudent">
+        <span class="pc-ico">♪</span>
+        <b>학습자용</b>
+        <span>음악을 듣고 활동지를 작성합니다</span>
+      </button>
+      <button class="pickcard teach" type="button" id="pickTeacher">
+        <span class="pc-ico">◎</span>
+        <b>수업자용</b>
+        <span>수업을 진행하고 학생 기록을 관리합니다</span>
+      </button>
+    </div>
+
+    <div id="gateForm" class="gate-form" style="display:none">
+      <h2 id="gateFormTitle">학습자용 접속</h2>
+      <div class="fld" id="fSid"><label for="gSid">학번</label>
+        <input id="gSid" type="text" inputmode="numeric" maxlength="5" placeholder="3105" autocomplete="off"></div>
+      <div class="fld" id="fName"><label for="gName">이름</label>
+        <input id="gName" type="text" maxlength="10" placeholder="홍길동" autocomplete="off"></div>
+      <div class="fld"><label for="gPw">비밀번호</label>
+        <input id="gPw" type="password" maxlength="20" placeholder="비밀번호" autocomplete="off"></div>
+      <p class="gate-err" id="gateErr"></p>
+      <div class="btn-row">
+        <button class="btn" type="button" id="gateGo">들어가기</button>
+        <button class="btn ghost" type="button" id="gateBack">뒤로</button>
+      </div>
+      <p class="gate-hint" id="gateHint"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 사용자 표시줄 ================= -->
+<div class="who" id="who">
+  <div class="wrap">
+    <span class="badge" id="whoRole">학습자</span>
+    <b id="whoName">이름</b>
+    <span id="whoSid" class="mono"></span>
+    <button class="btn ghost small" type="button" id="logout">나가기</button>
+  </div>
+</div>
+
+<!-- ================= 머리말 ================= -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="seal" aria-hidden="true">진<br>달</div>
+    <p class="eyebrow"><span id="modeBadge">학습자용</span> · 한 편의 시, 스무 개의 시대</p>
+    <h1>진달래<span class="pt">꽃</span></h1>
+    <p class="byline">김소월 시 · 서양음악사 양식별 편곡 감상</p>
+    <div class="hero-grid">
+      <div id="poem" class="poem"></div>
+      <div>
+        <p class="lede">1922년에 쓰인 한 편의 이별시를, 서양음악사의 스무 시대가 저마다의 방식으로 노래합니다.
+          선사시대의 두드림에서 오늘의 K-pop까지 <strong>가사는 그대로, 음악만 바뀝니다.</strong>
+          무엇이 달라지는지 귀로 확인하면 음악사는 외울 것이 아니라 들리는 것이 됩니다.</p>
+        <div class="btn-row" style="margin-bottom:24px">
+          <button class="btn" type="button" id="heroPlay">아무 시대나 들어 보기</button>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><b>20</b><span>편곡 음원</span></div>
+          <div class="stat"><b>9</b><span>시대 구분</span></div>
+          <div class="stat"><b>1</b><span>변하지 않는 시</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 탭 ================= -->
+<nav class="tabbar">
+  <div class="wrap inner" role="tablist">
+    <button class="tab" type="button" role="tab" data-tab="stage"   aria-selected="false">수업 진행</button>
+    <button class="tab" type="button" role="tab" data-tab="records" aria-selected="false">학생 기록</button>
+    <button class="tab" type="button" role="tab" data-tab="lesson"  aria-selected="false">수업 운영</button>
+    <button class="tab" type="button" role="tab" data-tab="explore" aria-selected="true">시대 탐구</button>
+    <button class="tab" type="button" role="tab" data-tab="quiz"    aria-selected="false">듣고 맞히기</button>
+    <button class="tab" type="button" role="tab" data-tab="order"   aria-selected="false">순서 세우기</button>
+    <button class="tab" type="button" role="tab" data-tab="sheet"   aria-selected="false">감상 활동지</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===== 수업 진행 (수업자용) ===== -->
+  <section class="panel" id="stage" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">교실 화면용</p>
+      <h2>수업 진행</h2>
+      <p>큰 화면에 띄워 놓고 쓰는 감상 진행 화면입니다. 좌우 화살표 키로도 곡을 넘길 수 있습니다.</p>
+    </div>
+
+    <div class="stagebox">
+      <div class="st-top">
+        <span class="st-num" id="stNum">01</span>
+        <div>
+          <h3 id="stTitle">원시음악</h3>
+          <p class="st-sub" id="stSub">Primitive Music</p>
+        </div>
+        <span class="st-era" id="stEra">원시·고대</span>
+      </div>
+
+      <p class="st-one" id="stOne"></p>
+
+      <div class="st-points">
+        <h4 id="stPointsTitle">음악적 특징</h4>
+        <ul id="stPoints"></ul>
+      </div>
+
+      <div class="st-lyric" id="stLyricBox" style="display:none"></div>
+
+      <div class="st-ctrl">
+        <button class="stbtn" type="button" id="stPrev"><span>◀ 이전</span></button>
+        <button class="stbtn main" type="button" id="stPlay"><span>재생</span></button>
+        <button class="stbtn" type="button" id="stNext"><span>다음 ▶</span></button>
+        <button class="stbtn tgl" type="button" id="stBlind" aria-pressed="false"><span>제목 가리기</span></button>
+        <button class="stbtn tgl" type="button" id="stLyric" aria-pressed="false"><span>노랫말</span></button>
+      </div>
+
+      <div class="st-jump" id="stJump"></div>
+    </div>
+  </section>
+
+  <!-- ===== 학생 기록 (수업자용) ===== -->
+  <section class="panel" id="records" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">수업자용</p>
+      <h2>학생 기록</h2>
+      <p>학생이 작성한 감상 활동지를 모아 보고 엑셀로 내려받습니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="quiz-score" style="border-bottom:0;padding-bottom:0;margin-bottom:0;justify-content:flex-start;gap:34px">
+        <div><b id="adN">0</b><span>학생 수</span></div>
+        <div><b id="adDone">0</b><span>총 작성 건수</span></div>
+        <div><b id="adAvg">0</b><span>1인 평균 곡 수</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>기록 모으기</h3>
+      <p class="cap">학생이 같은 기기에서 작성했다면 자동으로 모입니다. 학생이 자기 기기에서 작성했다면
+        학생이 만든 <b>제출_학번_이름.json</b> 파일을 받아 여기서 한꺼번에 불러오세요.</p>
+      <div class="btn-row" style="align-items:center">
+        <label class="btn" for="adImport">제출 파일 불러오기</label>
+        <input type="file" id="adImport" accept=".json,application/json" multiple hidden>
+        <button class="btn ghost" type="button" id="adBackup">전체 백업</button>
+        <button class="btn ghost small danger" type="button" id="adWipe">전체 지우기</button>
+      </div>
+      <p class="cap" style="margin-top:12px">학생 메일 수신 주소: <b id="adMail">설정 안 됨</b>
+        <button class="btn ghost small" type="button" id="adMailSet" style="margin-left:8px">변경</button></p>
+    </div>
+
+    <div class="card">
+      <h3>내려받기</h3>
+      <div class="btn-row">
+        <button class="btn" type="button" id="adXlsAll">총괄 엑셀 (전체)</button>
+        <button class="btn ghost" type="button" id="adXlsTrack">곡별 엑셀 (시트 분리)</button>
+        <button class="btn ghost" type="button" id="adXlsOne">지금 보는 곡만 엑셀</button>
+        <button class="btn ghost" type="button" id="adCsv">CSV</button>
+      </div>
+      <p class="cap" style="margin-top:12px">총괄 엑셀은 <b>총괄 / 학생별 요약 / 응답 통계</b> 세 시트로 나옵니다.
+        곡별 엑셀은 곡마다 시트를 따로 만듭니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="sheet-pick">
+        <label for="adView" class="cap" style="margin:0">보기</label>
+        <select class="pick" id="adView">
+          <option value="student">학생별</option>
+          <option value="track">곡별</option>
+          <option value="stat">응답 통계</option>
+        </select>
+        <span id="adTrackWrap" style="display:none">
+          <select class="pick" id="adTrack"></select>
+        </span>
+      </div>
+      <div id="adBody"></div>
+    </div>
+  </section>
+
+  <!-- ===== 수업 운영 ===== -->
+  <section class="panel" id="lesson" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">수업자용</p>
+      <h2>45분 수업 운영안</h2>
+      <p>이 탭만 인쇄하면 지도안이 됩니다.</p>
+    </div>
+    <div class="card"><h3>학습 목표</h3><div class="blk"><ul id="lsGoal"></ul></div></div>
+    <div class="card"><h3>수업 흐름</h3><div id="lsFlow"></div></div>
+    <div class="card"><h3>핵심 발문</h3><div class="blk"><ol id="lsAsk"></ol></div></div>
+    <div class="card"><h3>운영 요령</h3><div class="blk"><ul id="lsTips"></ul></div></div>
+  </section>
+
+  <!-- ===== 시대 탐구 ===== -->
+  <section class="panel on" id="explore" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">오선 위의 스무 시대</p>
+      <h2>음표를 누르면 그 시대가 들립니다</h2>
+      <p>가로축은 시대 순서, 세로축은 <b>성부·음향 층의 두께</b>입니다. 아래쪽 음표일수록 홑겹의 단순한 짜임새, 위쪽일수록 여러 겹이 쌓인 소리입니다.</p>
+    </div>
+    <div class="staff-shell">
+      <div class="staff-legend">
+        <span>↑ 겹겹 음향 (5)</span><span>선사시대 ————————— 현재</span><span>홑겹 단선율 (1) ↓</span>
+      </div>
+      <p class="swipe-hint">좌우로 밀어서 스무 시대를 모두 보세요</p>
+      <div class="staff-scroll">
+        <div class="staff-inner">
+          <div class="staff" id="staff"></div>
+          <div class="era-row" id="eraRow"></div>
+        </div>
+      </div>
+    </div>
+    <article class="detail" id="detail"></article>
+  </section>
+
+  <!-- ===== 듣고 맞히기 ===== -->
+  <section class="panel" id="quiz" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">블라인드 감상</p>
+      <h2>제목을 가리고 소리만으로 시대를 찾습니다</h2>
+      <p>정답보다 중요한 것은 근거입니다. 고르기 전에 "왜 그렇게 들렸는지" 한 문장으로 말해 보세요.</p>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-score">
+        <div><b id="qDone">0</b><span>푼 문제</span></div>
+        <div><b id="qRight">0</b><span>맞힌 문제</span></div>
+        <div><b id="qRate">–</b><span>정답률</span></div>
+      </div>
+      <div id="qStage"><p class="quiz-q">[문제 시작]을 누르면 무작위로 한 곡이 재생됩니다.</p></div>
+      <div class="btn-row" style="justify-content:center;margin-top:20px">
+        <button class="btn" type="button" id="qStart">문제 시작</button>
+        <button class="btn ghost small" type="button" id="qReset">점수 초기화</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 순서 세우기 ===== -->
+  <section class="panel" id="order" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">연대 배열</p>
+      <h2>여섯 곡을 시대 순으로 세워 보세요</h2>
+      <p>아래 카드를 <b>이른 시대부터 차례로</b> 누르면 위 칸에 하나씩 채워집니다. 잘못 넣었다면 × 를 눌러 빼세요.</p>
+    </div>
+    <div class="card">
+      <div class="slot-row" id="oSlots"></div>
+      <div class="pool" id="oPool"></div>
+      <div class="btn-row">
+        <button class="btn" type="button" id="oCheck">채점하기</button>
+        <button class="btn ghost" type="button" id="oNew">다시 뽑기</button>
+      </div>
+      <div id="oResult" style="margin-top:20px"></div>
+    </div>
+  </section>
+
+  <!-- ===== 감상 활동지 ===== -->
+  <section class="panel" id="sheet" role="tabpanel">
+    <div class="sec-head">
+      <p class="eyebrow">스스로 채우는 기록</p>
+      <h2>들으면서 바로 적는 감상 활동지</h2>
+      <p>곡을 고르고 들으면서 항목을 고른 뒤 [저장하기]를 누르세요. 곡 하나만 따로 내보낼 수도, 스무 곡을 묶어 낼 수도 있습니다.</p>
+    </div>
+    <div class="card">
+      <div class="sheet-pick">
+        <select class="pick" id="sheetPick" aria-label="곡 고르기"></select>
+        <button class="btn small" type="button" id="sheetPlay">듣기 / 멈추기</button>
+        <span class="saved-note" id="sheetSaved"></span>
+      </div>
+      <p id="sheetWarn" class="quiz-q" style="display:none;color:#C4462F"></p>
+      <div id="sheetBody"></div>
+
+      <div class="act">
+        <p class="act-t">이 곡만</p>
+        <div class="btn-row">
+          <button class="btn" type="button" id="sheetSave">저장하기</button>
+          <button class="btn ghost" type="button" id="sheetOneDl">내려받기 (txt)</button>
+          <button class="btn ghost" type="button" id="sheetOneXls">엑셀</button>
+          <button class="btn ghost" type="button" id="sheetOneMail">메일 보내기</button>
+        </div>
+      </div>
+
+      <div class="act">
+        <p class="act-t">스무 곡 전체</p>
+        <div class="btn-row">
+          <button class="btn ghost" type="button" id="sheetAllDl">전체 내려받기 (txt)</button>
+          <button class="btn ghost" type="button" id="sheetAllXls">전체 엑셀</button>
+          <button class="btn ghost" type="button" id="sheetAllMail">전체 메일 보내기</button>
+          <button class="btn ghost" type="button" id="sheetPrint">인쇄</button>
+          <button class="btn" type="button" id="sheetSubmit">선생님께 제출 파일 만들기</button>
+        </div>
+      </div>
+
+      <div style="margin-top:24px">
+        <h4 class="mini-h">작성 현황 · <span id="sheetCount"></span></h4>
+        <div class="done-grid" id="sheetDots"></div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn ghost small danger" type="button" id="sheetWipe">이 기기에서 내 기록 지우기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <b>진달래꽃</b> — 김소월(1902~1934). 1922년 「개벽」 발표, 1925년 시집 『진달래꽃』 수록. 저작권 보호기간 만료.<br>
+    음원은 수업 활용을 위해 시대 양식별로 새로 편곡·제작한 것으로, 실제 시대의 원곡 녹음이 아닙니다.<br>
+    기록은 사용하는 기기의 브라우저에 저장됩니다. 공용 컴퓨터에서는 마친 뒤 [나가기]를 눌러 주세요.
+  </footer>
+</main>
+
+<!-- ================= 플레이어 ================= -->
+<div class="player" id="player">
+  <div class="err" id="plErr"></div>
+  <div class="wrap">
+    <div class="pl-info">
+      <div class="t" id="plTitle">원시음악</div>
+      <div class="s" id="plSub">Primitive Music · 선사시대</div>
+    </div>
+    <div class="pl-btns">
+      <button class="icb" type="button" id="plPrev" aria-label="이전 곡" title="이전 곡">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M6 5h2.4v14H6zM20 5v14L9.6 12z"/></svg></button>
+      <button class="icb" type="button" id="plBack" aria-label="10초 뒤로" title="10초 뒤로">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 1 2.6 6.1"/><path d="M3.2 6.6v5h5"/></svg></button>
+      <button class="icb main" type="button" id="plPlay" aria-label="재생">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+      <button class="icb" type="button" id="plNext" aria-label="다음 곡" title="다음 곡">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M15.6 5H18v14h-2.4zM4 5v14l10.4-7z"/></svg></button>
+      <button class="icb" type="button" id="plLoop" aria-label="한 곡 반복" aria-pressed="false" title="한 곡 반복">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 12V10a4 4 0 0 1 4-4h13"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 12v2a4 4 0 0 1-4 4h-13"/></svg></button>
+    </div>
+    <div class="pl-seek">
+      <span class="tm-txt" id="plCur">0:00</span>
+      <input type="range" class="seek" id="plSeek" min="0" max="1000" value="0" aria-label="재생 위치">
+      <span class="tm-txt" id="plDur">0:00</span>
+    </div>
+    <div class="pl-vol">
+      <button class="icb sm" type="button" id="plMute" aria-label="음소거">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="icb sm" type="button" id="plVolDn" aria-label="음량 줄이기" title="음량 줄이기">−</button>
+      <input type="range" class="seek vol" id="plVol" min="0" max="100" value="85" aria-label="음량">
+      <button class="icb sm" type="button" id="plVolUp" aria-label="음량 키우기" title="음량 키우기">＋</button>
+      <span class="tm-txt vt" id="plVolTxt">85%</span>
+    </div>
+    <select class="rate" id="plRate" aria-label="재생 속도">
+      <option value="0.75">0.75×</option>
+      <option value="1" selected>1.0×</option>
+      <option value="1.25">1.25×</option>
+      <option value="1.5">1.5×</option>
+    </select>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printArea" class="print-only"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/xlsx-mini.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/cloud.js"></script>
+</body>
+</html>
