@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>설치 점검 — 진달래꽃 온라인 제출</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#241F1B; --dim:#7A6F63; --line:#D8CEBE;
+  --bg:#EDE7DB; --paper:#F6F1E6; --red:#C4462F; --green:#3E7A52; --amber:#B7791F;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans KR",sans-serif; font-size:15px; line-height:1.7;
+  padding:40px 20px 80px;
+}
+.wrap{max-width:680px;margin:0 auto}
+h1{font-family:"Nanum Myeongjo",serif;font-size:1.7rem;margin:0 0 6px;letter-spacing:-.01em}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;color:var(--dim);margin:0 0 10px;text-transform:uppercase}
+.lede{color:var(--dim);font-size:.88rem;margin:0 0 30px}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:18px}
+.card h2{font-family:"Nanum Myeongjo",serif;font-size:1.05rem;margin:0 0 14px}
+label{display:block;font-size:.76rem;color:var(--dim);margin-bottom:6px}
+input[type=text]{
+  width:100%;font:inherit;font-size:.85rem;font-family:"JetBrains Mono",monospace;
+  padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);
+}
+input:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.fld{margin-bottom:14px}
+
+.btn{
+  font:inherit;font-size:.88rem;font-weight:500;padding:11px 22px;border-radius:7px;
+  border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;
+}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:none;color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.origin{
+  font-family:"JetBrains Mono",monospace;font-size:.82rem;
+  background:var(--paper);border:1px dashed var(--line);border-radius:7px;
+  padding:11px 13px;margin:12px 0;word-break:break-all;
+}
+.origin b{color:var(--red)}
+
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps li{
+  counter-increment:s;position:relative;padding:16px 0 16px 42px;
+  border-bottom:1px solid rgba(216,206,190,.6);
+}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:17px;
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;font-size:.75rem;
+  background:var(--paper);border:1px solid var(--line);color:var(--dim);
+}
+li.pass::before{content:"✓";background:var(--green);border-color:var(--green);color:#fff}
+li.fail::before{content:"✕";background:var(--red);border-color:var(--red);color:#fff}
+li.warn::before{content:"!";background:var(--amber);border-color:var(--amber);color:#fff}
+li.busy::before{content:"…";background:var(--paper)}
+.t{font-weight:500}
+.d{font-size:.82rem;color:var(--dim);margin-top:4px;white-space:pre-line}
+li.fail .d{color:var(--red)}
+li.warn .d{color:var(--amber)}
+.fix{
+  font-size:.8rem;margin-top:9px;padding:10px 13px;border-radius:7px;
+  background:rgba(196,70,47,.06);border-left:2px solid var(--red);white-space:pre-line;
+}
+li.warn .fix{background:rgba(183,121,31,.07);border-left-color:var(--amber)}
+.mono{font-family:"JetBrains Mono",monospace;font-size:.8rem}
+#gbtn{margin:14px 0 4px;min-height:44px}
+.note{font-size:.78rem;color:var(--dim);margin-top:22px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">진달래꽃 × 서양음악사</p>
+  <h1>온라인 제출 설치 점검</h1>
+  <p class="lede">설치가 제대로 되었는지 여섯 단계로 확인합니다. 막힌 곳이 있으면 무엇을 고쳐야 하는지 함께 알려 드립니다.</p>
+
+  <div class="card">
+    <h2>1. 값 두 개 넣기</h2>
+    <div class="fld">
+      <label for="api">웹 앱 URL — Apps Script 배포에서 나온 주소 (…/exec 로 끝남)</label>
+      <input type="text" id="api" placeholder="https://script.google.com/macros/s/AKfy.../exec" spellcheck="false">
+    </div>
+    <div class="fld">
+      <label for="cid">클라이언트 ID — Google Cloud 사용자 인증 정보에서 나온 값</label>
+      <input type="text" id="cid" placeholder="1234...apps.googleusercontent.com" spellcheck="false">
+    </div>
+
+    <p style="font-size:.78rem;color:var(--dim);margin:18px 0 0">지금 이 페이지의 주소입니다. Google Cloud 의 <b>승인된 자바스크립트 원본</b>에 <b>이것과 글자 하나까지 같게</b> 들어가 있어야 합니다.</p>
+    <div class="origin" id="origin"></div>
+
+    <div class="row">
+      <button class="btn" type="button" id="run">점검 시작</button>
+      <button class="btn ghost" type="button" id="clear">지우기</button>
+    </div>
+    <div id="gbtn"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. 점검 결과</h2>
+    <ol class="steps" id="steps">
+      <li data-k="origin"><div class="t">페이지 주소가 올바른 곳인가</div><div class="d">아직 점검하지 않았습니다.</div></li>
+      <li data-k="api"><div class="t">웹 앱이 응답하는가</div><div class="d">아직 점검하지 않았습니다.</div></li>
+      <li data-k="gis"><div class="t">구글 로그인이 열리는가</div><div class="d">아직 점검하지 않았습니다.</div></li>
+      <li data-k="who"><div class="t">서버가 계정을 알아보는가</div><div class="d">아직 점검하지 않았습니다.</div></li>
+      <li data-k="sheet"><div class="t">시트가 준비되었는가</div><div class="d">아직 점검하지 않았습니다.</div></li>
+      <li data-k="win"><div class="t">제출창이 작동하는가</div><div class="d">아직 점검하지 않았습니다.</div></li>
+    </ol>
+  </div>
+
+  <p class="note">
+    이 파일은 실제 페이지와 <b>같은 주소</b>에 올려 두고 여세요. 저장소에 그대로 넣으면
+    <span class="mono">https://아이디.github.io/저장소/점검.html</span> 로 열립니다.<br>
+    내 컴퓨터에서 파일을 바로 열면(<span class="mono">file://</span>) 구글 로그인이 절대 뜨지 않습니다. 오류가 아니라 원래 그렇습니다.<br>
+    점검이 끝나면 이 파일은 지워도 됩니다.
+  </p>
+
+</div>
+
+<script>
+var $ = function (s) { return document.querySelector(s); };
+var KEY = 'jindallae-check';
+
+/* ---------- 저장된 값 ---------- */
+try {
+  var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+  if (saved.api) $('#api').value = saved.api;
+  if (saved.cid) $('#cid').value = saved.cid;
+} catch (e) {}
+$('#origin').textContent = location.origin;
+if (location.protocol === 'file:') {
+  $('#origin').innerHTML = '<b>file:// — 이 상태로는 구글 로그인이 뜨지 않습니다</b>';
+}
+$('#clear').addEventListener('click', function () {
+  localStorage.removeItem(KEY); $('#api').value = ''; $('#cid').value = '';
+  reset(); mark('origin', '', '아직 점검하지 않았습니다.');
+});
+
+/* ---------- 결과 칠하기 ---------- */
+function li(k) { return $('li[data-k="' + k + '"]'); }
+function mark(k, cls, desc, fix) {
+  var e = li(k); if (!e) return;
+  e.className = cls || '';
+  e.querySelector('.d').textContent = desc || '';
+  var old = e.querySelector('.fix'); if (old) old.remove();
+  if (fix) {
+    var f = document.createElement('div');
+    f.className = 'fix'; f.textContent = fix;
+    e.appendChild(f);
+  }
+}
+function reset() {
+  ['origin','api','gis','who','sheet','win'].forEach(function (k) {
+    mark(k, '', '아직 점검하지 않았습니다.');
+  });
+}
+
+/* ---------- 서버 부르기 ---------- */
+var API = '', CID = '', TOKEN = null;
+
+function post(action, body) {
+  var p = Object.assign({ action: action, idToken: TOKEN }, body || {});
+  return fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(p),
+    redirect: 'follow'
+  }).then(function (r) { return r.json(); });
+}
+
+/* ---------- 점검 시작 ---------- */
+$('#run').addEventListener('click', start);
+
+function start() {
+  API = $('#api').value.trim();
+  CID = $('#cid').value.trim();
+  localStorage.setItem(KEY, JSON.stringify({ api: API, cid: CID }));
+  reset();
+  $('#run').disabled = true;
+  step1();
+}
+
+/* 1. 주소 */
+function step1() {
+  if (location.protocol === 'file:') {
+    mark('origin', 'fail', 'file:// 로 열려 있습니다.',
+      '구글 로그인은 내 컴퓨터에서 바로 연 파일에서는 동작하지 않습니다.\n이 파일을 저장소에 올려 https:// 주소로 여세요.');
+    return done();
+  }
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    mark('origin', 'warn', location.origin, 'https 가 아닙니다. GitHub Pages 주소로 여세요.');
+  } else {
+    mark('origin', 'pass', location.origin + ' — 이 값이 승인된 자바스크립트 원본에 있어야 합니다.');
+  }
+  step2();
+}
+
+/* 2. 웹 앱 응답 */
+function step2() {
+  if (API.indexOf('https://script.google.com/') !== 0) {
+    mark('api', 'fail', 'Apps Script 주소가 아닙니다.',
+      'Apps Script 편집기 ▸ 배포 ▸ 배포 관리 에서 웹 앱 URL 을 복사하세요.');
+    return done();
+  }
+  if (API.slice(-5) !== '/exec') {
+    mark('api', 'fail', '주소가 /exec 로 끝나지 않습니다.',
+      '/dev 로 끝나는 주소는 선생님 본인만 열립니다. 배포 후 나오는 /exec 주소를 쓰세요.');
+    return done();
+  }
+  mark('api', 'busy', '응답을 기다리는 중…');
+
+  fetch(API, { redirect: 'follow' })
+    .then(function (r) { return r.json(); })
+    .then(function (o) {
+      if (o && o.alive) {
+        mark('api', 'pass', '웹 앱이 살아 있습니다. 서버 시각 ' + (o.now || ''));
+        step3();
+      } else {
+        mark('api', 'fail', '응답은 왔지만 이 스크립트가 아닙니다.',
+          'Code.gs 를 붙여넣은 뒤 다시 배포했는지 확인하세요.');
+        done();
+      }
+    })
+    .catch(function () {
+      mark('api', 'fail', '주소에 닿지 못했습니다.',
+        '배포할 때 [액세스 권한이 있는 사용자] 가 "모든 사용자" 인지 확인하세요.\n' +
+        '"나만" 이나 "도메인 내 사용자" 로 두면 학생 브라우저에서 막힙니다.');
+      done();
+    });
+}
+
+/* 3. 구글 로그인 */
+function step3() {
+  if (CID.indexOf('.apps.googleusercontent.com') < 0) {
+    mark('gis', 'fail', '클라이언트 ID 모양이 아닙니다.',
+      'Google Cloud ▸ API 및 서비스 ▸ 사용자 인증 정보 에서\nOAuth 2.0 클라이언트 ID 값을 복사하세요.');
+    return done();
+  }
+  mark('gis', 'busy', '로그인 창을 준비하는 중…');
+
+  var s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.async = true; s.defer = true;
+  s.onerror = function () {
+    mark('gis', 'fail', '구글 로그인 스크립트를 못 받았습니다.',
+      '학교 네트워크가 accounts.google.com 을 막고 있을 수 있습니다.\n휴대폰 데이터로 한 번 열어 보세요.');
+    done();
+  };
+  s.onload = function () {
+    try {
+      google.accounts.id.initialize({
+        client_id: CID, callback: step4, ux_mode: 'popup', auto_select: false
+      });
+      google.accounts.id.renderButton($('#gbtn'), {
+        theme: 'outline', size: 'large', text: 'signin_with', locale: 'ko', width: 280
+      });
+      mark('gis', 'warn', '위쪽 [Google 계정으로 로그인] 단추를 눌러 주세요.',
+        '학생 계정으로 눌러 보면 학생 쪽 점검이 되고,\n선생님 계정으로 누르면 교사 권한까지 함께 확인됩니다.');
+      $('#gbtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      mark('gis', 'fail', '로그인 창을 만들지 못했습니다: ' + e.message,
+        '클라이언트 ID 를 다시 확인하세요.');
+      done();
+    }
+  };
+  document.head.appendChild(s);
+}
+
+/* 4. 계정 확인 */
+function step4(res) {
+  TOKEN = res.credential;
+  mark('gis', 'pass', '로그인 창이 정상으로 열렸습니다.');
+  mark('who', 'busy', '서버에 물어보는 중…');
+
+  post('check').then(function (o) {
+    if (!o.ok) {
+      if (String(o.error || '').indexOf('이 페이지에서 발급된') >= 0) {
+        mark('who', 'fail', o.error,
+          'Code.gs 의 CLIENT_ID 와 이 페이지의 클라이언트 ID 가 서로 다릅니다.\n같은 값으로 맞춘 뒤 Apps Script 를 다시 배포하세요.');
+      } else if (o.need === 'wrongdomain') {
+        mark('who', 'warn', o.error,
+          '학교 계정이 아닌 것으로 막혔습니다. 이 동작 자체는 정상입니다.\n학교 계정으로 다시 눌러 확인해 보세요.');
+      } else {
+        mark('who', 'fail', o.error || '알 수 없는 응답', 'Apps Script 실행 기록에서 오류를 확인하세요.');
+      }
+      return done();
+    }
+    mark('who', 'pass',
+      o.email + (o.teacher ? ' · 수업자로 인식됨' : ' · 학습자로 인식됨') +
+      '\n허용 도메인 @' + o.domain + ' · 등록된 수업자 ' + o.teachers + '명');
+    step5(o);
+  }).catch(function () {
+    mark('who', 'fail', '서버 응답을 읽지 못했습니다.',
+      '배포를 [새 버전] 으로 다시 올린 뒤 시도해 보세요.');
+    done();
+  });
+}
+
+/* 5. 시트 */
+function step5(o) {
+  if (!o.ready) {
+    mark('sheet', 'fail', '빠진 시트: ' + o.missing.join(', '),
+      'Apps Script 편집기에서 함수 setup 을 한 번 실행하세요.\n네 장(설정·제출·명렬표·로그)이 자동으로 만들어집니다.');
+    return done();
+  }
+  var d = '네 장 모두 준비되었습니다. 명렬표 ' + o.rollCount + '명 등록됨.';
+  if (o.rollCount === 0) {
+    mark('sheet', 'warn', d,
+      '명렬표가 비어 있습니다. 이대로도 쓸 수 있지만,\n학생이 학번을 직접 적게 되고 첫 제출한 계정에 묶입니다.\n명렬표를 채우면 학번 칸이 잠겨 사칭이 아예 불가능합니다.');
+  } else if (!o.teacher && !o.inRoll) {
+    mark('sheet', 'warn', d,
+      '지금 계정은 명렬표에 없습니다. [명렬표검사] 를 켜 두면 이 계정은 제출이 막힙니다.');
+  } else {
+    mark('sheet', 'pass', d);
+  }
+  step6(o);
+}
+
+/* 6. 제출창 */
+function step6(o) {
+  if (o.open) {
+    mark('win', 'pass', '지금 제출이 열려 있습니다. 서버 시각 ' + o.now,
+      '수업 전에는 닫아 두세요. 구글 시트 상단 메뉴\n[진달래꽃 제출 ▸ 지금 제출 닫기] 로 바로 됩니다.');
+  } else {
+    mark('win', 'pass', '지금은 닫혀 있습니다 — ' + o.why +
+      '\n닫힘 판정이 서버에서 나온다는 뜻이므로 정상입니다.');
+  }
+  done(true);
+}
+
+function done(all) {
+  $('#run').disabled = false;
+  $('#run').textContent = all ? '다시 점검' : '점검 시작';
+}
+</script>
+</body>
+</html>
